@@ -72,6 +72,96 @@ CREATE OR REPLACE FUNCTION "update_timestamp_fields"() RETURNS trigger AS $updat
   END;
 $update_timestamp_fields$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION "expenditure_update_account_amount"() RETURNS trigger AS $expenditure_update_account_amount$
+  BEGIN
+    IF (TG_OP = 'DELETE') THEN
+
+      -- When expenditure delete row, we add old amount
+      UPDATE "account"
+        SET
+          "amount" = "amount" + OLD.amount
+        WHERE
+          "id" = OLD.account_id;
+      RETURN OLD;
+
+    ELSIF (TG_OP = 'INSERT') THEN
+
+      -- When expenditure insert row, we subtract new amount
+      UPDATE "account"
+        SET
+          "amount" = "amount" - NEW.amount
+        WHERE
+          "id" = NEW.account_id;
+      RETURN NEW;
+
+    ELSIF (TG_OP = 'UPDATE') THEN
+
+      -- When expenditure update row, we:
+      --
+      -- 1. add old amount
+      -- 2. sub new amount
+      UPDATE "account"
+        SET
+          "amount" = "amount" + OLD.amount
+        WHERE
+          "id" = OLD.account_id;
+
+      UPDATE "account"
+        SET
+          "amount" = "amount" - NEW.amount
+        WHERE
+          "id" = NEW.account_id;
+      RETURN NEW;
+
+    END IF;
+  END;
+$expenditure_update_account_amount$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION "income_update_account_amount"() RETURNS trigger AS $income_update_account_amount$
+  BEGIN
+    IF (TG_OP = 'DELETE') THEN
+
+      -- When income delete row, we sub old amount
+      UPDATE "account"
+        SET
+          "amount" = "amount" - OLD.amount
+        WHERE
+          "id" = OLD.account_id;
+      RETURN OLD;
+
+    ELSIF (TG_OP = 'INSERT') THEN
+
+      -- When income insert row, we add new amount
+      UPDATE "account"
+        SET
+          "amount" = "amount" + NEW.amount
+        WHERE
+          "id" = NEW.account_id;
+      RETURN NEW;
+
+    ELSIF (TG_OP = 'UPDATE') THEN
+
+      -- When expenditure update row, we:
+      --
+      -- 1. sub old amount
+      -- 2. add new amount
+      UPDATE "account"
+        SET
+          "amount" = "amount" - OLD.amount
+        WHERE
+          "id" = OLD.account_id;
+
+      UPDATE "account"
+        SET
+          "amount" = "amount" + NEW.amount
+        WHERE
+          "id" = NEW.account_id;
+      RETURN NEW;
+
+    END IF;
+  END;
+$income_update_account_amount$ LANGUAGE plpgsql;
+
 CREATE TRIGGER "currency_update_timestamp_fields"
   BEFORE INSERT OR UPDATE ON "currency"
   FOR EACH ROW EXECUTE PROCEDURE update_timestamp_fields();
@@ -95,3 +185,43 @@ CREATE TRIGGER "expenditure_update_timestamp_fields"
 CREATE TRIGGER "income_update_timestamp_fields"
   BEFORE INSERT OR UPDATE ON "income"
   FOR EACH ROW EXECUTE PROCEDURE update_timestamp_fields();
+
+CREATE TRIGGER "expenditure_amount_change"
+  BEFORE INSERT OR UPDATE OR DELETE ON "expenditure"
+  FOR EACH ROW EXECUTE PROCEDURE expenditure_update_account_amount();
+
+CREATE TRIGGER "income_amount_change"
+  BEFORE INSERT OR UPDATE OR DELETE ON "income"
+  FOR EACH ROW EXECUTE PROCEDURE income_update_account_amount();
+
+
+INSERT INTO "user"("username", "email") VALUES
+  ('user0', 'user0@example.com'),
+  ('user1', 'user1@example.com'),
+  ('user2', 'user2@example.com'),
+  ('user3', 'user3@example.com'),
+  ('user4', 'user4@example.com');
+
+INSERT INTO "currency"("title", "iso4217") VALUES
+  ('Russian ruble', 'RUB'),
+  ('Dollar', 'USD'),
+  ('Euro', 'EUR'),
+  ('Bitcoin', 'BTC');
+
+INSERT INTO "account"("title", "user_id", "currency_id") VALUES
+  ('Wallet', (SELECT id FROM "user" WHERE "username" = 'user0' LIMIT 1), (SELECT id FROM "currency" WHERE "iso4217" = 'RUB' LIMIT 1)),
+  ('Crypto', (SELECT id FROM "user" WHERE "username" = 'user0' LIMIT 1), (SELECT id FROM "currency" WHERE "iso4217" = 'BTC' LIMIT 1)),
+  ('Wallet', (SELECT id FROM "user" WHERE "username" = 'user1' LIMIT 1), (SELECT id FROM "currency" WHERE "iso4217" = 'USD' LIMIT 1)),
+  ('Wallet', (SELECT id FROM "user" WHERE "username" = 'user3' LIMIT 1), (SELECT id FROM "currency" WHERE "iso4217" = 'EUR' LIMIT 1));
+
+INSERT INTO "income_category"("title") VALUES
+  ('Initial'),
+  ('Salary'),
+  ('Other');
+
+INSERT INTO "expenditure_category"("title") VALUES
+  ('Food'),
+  ('Communal'),
+  ('Education'),
+  ('Health'),
+  ('Entertainment');

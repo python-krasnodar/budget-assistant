@@ -1,3 +1,5 @@
+DROP TRIGGER IF EXISTS "income_amount_change" ON "income";
+DROP TRIGGER IF EXISTS "expenditure_amount_change" ON "expenditure";
 DROP TRIGGER IF EXISTS "expenditure_update_timestamp_fields" ON "expenditure";
 DROP TRIGGER IF EXISTS "income_update_timestamp_fields" ON "income";
 DROP TRIGGER IF EXISTS "expenditure_category_update_timestamp_fields" ON "expenditure_category";
@@ -5,6 +7,8 @@ DROP TRIGGER IF EXISTS "income_category_update_timestamp_fields" ON "income_cate
 DROP TRIGGER IF EXISTS "currency_update_timestamp_fields" ON "currency";
 DROP TRIGGER IF EXISTS "account_update_timestamp_fields" ON "account";
 
+DROP FUNCTION IF EXISTS income_update_account_amount();
+DROP FUNCTION IF EXISTS expenditure_update_account_amount();
 DROP FUNCTION IF EXISTS update_timestamp_fields();
 
 DROP TABLE IF EXISTS "income";
