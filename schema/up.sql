@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS "income_category" (
 
 CREATE TABLE IF NOT EXISTS "expenditure" (
   "id" SERIAL PRIMARY KEY,
-  "amount" DECIMAL(15, 2) NOT NULL,
+  "amount" DECIMAL(15, 2) NOT NULL CHECK (amount > 0),
   "category_id" INTEGER NOT NULL CONSTRAINT "fk_expenditure_category_id" REFERENCES "expenditure_category"("id"),
   "account_id" INTEGER NOT NULL CONSTRAINT "fk_expenditure_account_id" REFERENCES "account"("id"),
   "created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS "expenditure" (
 
 CREATE TABLE IF NOT EXISTS "income" (
   "id" SERIAL PRIMARY KEY,
-  "amount" DECIMAL(15, 2) NOT NULL,
+  "amount" DECIMAL(15, 2) NOT NULL CHECK (amount > 0),
   "category_id" INTEGER NOT NULL CONSTRAINT "fk_income_category_id" REFERENCES "income_category"("id"),
   "account_id" INTEGER NOT NULL CONSTRAINT "fk_income_account_id" REFERENCES "account"("id"),
   "created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
