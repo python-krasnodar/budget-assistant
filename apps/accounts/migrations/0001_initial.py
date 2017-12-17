@@ -20,10 +20,10 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(max_length=255)),
-                ('description', models.TextField(default=None)),
-                ('amount', models.DecimalField(blank=True, decimal_places=2, default=0, max_digits=15)),
-                ('created_at', models.DateTimeField(blank=True)),
-                ('updated_at', models.DateTimeField(blank=True, default=None, null=True)),
+                ('description', models.TextField(blank=True, default=None, null=True)),
+                ('amount', models.DecimalField(blank=True, decimal_places=2, default=0.0, editable=False, max_digits=15)),
+                ('created_at', models.DateTimeField(blank=True, editable=False)),
+                ('updated_at', models.DateTimeField(blank=True, default=None, null=True, editable=False)),
             ],
         ),
         migrations.CreateModel(
@@ -32,8 +32,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(max_length=255)),
                 ('iso4217', models.CharField(max_length=3, unique=True)),
-                ('created_at', models.DateTimeField(blank=True)),
-                ('updated_at', models.DateTimeField(blank=True, default=None, null=True)),
+                ('created_at', models.DateTimeField(blank=True, editable=False)),
+                ('updated_at', models.DateTimeField(blank=True, default=None, null=True, editable=False)),
             ],
         ),
         migrations.AddField(

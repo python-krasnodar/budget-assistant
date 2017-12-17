@@ -3,7 +3,7 @@ from django.db import models
 
 TRANSACTION_TYPES = (
     ('I', 'Income'),
-    ('E', 'Expend'),
+    ('E', 'Expenditure'),
 )
 
 

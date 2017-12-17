@@ -20,8 +20,8 @@ CREATE OR REPLACE FUNCTION "update_account_amount"() RETURNS trigger AS $update_
     -- Check transaction category id
     IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
 
-      SELECT "user_id" INTO account_user_id FROM "account" WHERE "id" = NEW.account_id;
-      SELECT "user_id" INTO category_user_id FROM "transaction_category" WHERE "id" = NEW.category_id;
+      SELECT "user_id" INTO account_user_id FROM "accounts_account" WHERE "id" = NEW.account_id;
+      SELECT "user_id" INTO category_user_id FROM "transactions_category" WHERE "id" = NEW.category_id;
 
       IF (account_user_id != category_user_id) THEN
         RAISE EXCEPTION 'Invalid transaction category id';
@@ -32,9 +32,9 @@ CREATE OR REPLACE FUNCTION "update_account_amount"() RETURNS trigger AS $update_
     IF (TG_OP = 'DELETE') THEN
 
       IF (OLD.type = 'E') THEN
-        UPDATE "account" SET "amount" = "amount" + OLD.amount WHERE "id" = OLD.account_id;
+        UPDATE "accounts_account" SET "amount" = "amount" + OLD.amount WHERE "id" = OLD.account_id;
       ELSIF (OLD.type = 'I') THEN
-        UPDATE "account" SET "amount" = "amount" - OLD.amount WHERE "id" = OLD.account_id;
+        UPDATE "accounts_account" SET "amount" = "amount" - OLD.amount WHERE "id" = OLD.account_id;
       END IF;
 
       RETURN OLD;
@@ -42,9 +42,9 @@ CREATE OR REPLACE FUNCTION "update_account_amount"() RETURNS trigger AS $update_
     ELSIF (TG_OP = 'INSERT') THEN
 
       IF (NEW.type = 'E') THEN
-        UPDATE "account" SET "amount" = "amount" - NEW.amount WHERE "id" = NEW.account_id;
+        UPDATE "accounts_account" SET "amount" = "amount" - NEW.amount WHERE "id" = NEW.account_id;
       ELSEIF (NEW.type = 'I') THEN
-        UPDATE "account" SET "amount" = "amount" + NEW.amount WHERE "id" = NEW.account_id;
+        UPDATE "accounts_account" SET "amount" = "amount" + NEW.amount WHERE "id" = NEW.account_id;
       END IF;
 
       RETURN NEW;
@@ -52,15 +52,15 @@ CREATE OR REPLACE FUNCTION "update_account_amount"() RETURNS trigger AS $update_
     ELSIF (TG_OP = 'UPDATE') THEN
 
       IF (OLD.type = 'E') THEN
-        UPDATE "account" SET "amount" = "amount" + OLD.amount WHERE "id" = OLD.account_id;
+        UPDATE "accounts_account" SET "amount" = "amount" + OLD.amount WHERE "id" = OLD.account_id;
       ELSIF (OLD.type = 'I') THEN
-        UPDATE "account" SET "amount" = "amount" - OLD.amount WHERE "id" = OLD.account_id;
+        UPDATE "accounts_account" SET "amount" = "amount" - OLD.amount WHERE "id" = OLD.account_id;
       END IF;
 
       IF (NEW.type = 'E') THEN
-        UPDATE "account" SET "amount" = "amount" - NEW.amount WHERE "id" = NEW.account_id;
+        UPDATE "accounts_account" SET "amount" = "amount" - NEW.amount WHERE "id" = NEW.account_id;
       ELSIF (NEW.type = 'I') THEN
-        UPDATE "account" SET "amount" = "amount" + NEW.amount WHERE "id" = NEW.account_id;
+        UPDATE "accounts_account" SET "amount" = "amount" + NEW.amount WHERE "id" = NEW.account_id;
       END IF;
 
       RETURN NEW;
