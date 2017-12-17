@@ -1,0 +1,12 @@
+DEBUG = True
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': 'localhost',
+        'PORT': 5432,
+        'USER': 'budget_assistant',
+        'PASSWORD': 'budget_assistant',
+        'NAME': 'budget_assistant',
+    }
+}
