@@ -1,21 +1,32 @@
-DROP TRIGGER IF EXISTS "income_amount_change" ON "income";
-DROP TRIGGER IF EXISTS "expenditure_amount_change" ON "expenditure";
-DROP TRIGGER IF EXISTS "expenditure_update_timestamp_fields" ON "expenditure";
-DROP TRIGGER IF EXISTS "income_update_timestamp_fields" ON "income";
-DROP TRIGGER IF EXISTS "expenditure_category_update_timestamp_fields" ON "expenditure_category";
-DROP TRIGGER IF EXISTS "income_category_update_timestamp_fields" ON "income_category";
-DROP TRIGGER IF EXISTS "currency_update_timestamp_fields" ON "currency";
-DROP TRIGGER IF EXISTS "account_update_timestamp_fields" ON "account";
+-- ---------------------------------------------------------------------------------------------------------------------
+-- Triggers Section
+-- ---------------------------------------------------------------------------------------------------------------------
 
-DROP FUNCTION IF EXISTS income_update_account_amount();
-DROP FUNCTION IF EXISTS expenditure_update_account_amount();
+DROP TRIGGER IF EXISTS "transaction_update_account_amount" ON "transaction";
+DROP TRIGGER IF EXISTS "transaction_update_timestamp_fields" ON "transaction";
+DROP TRIGGER IF EXISTS "transaction_category_update_timestamp_fields" ON "transaction_category";
+DROP TRIGGER IF EXISTS "account_update_timestamp_fields" ON "account";
+DROP TRIGGER IF EXISTS "currency_update_timestamp_fields" ON "currency";
+
+-- ---------------------------------------------------------------------------------------------------------------------
+-- Functions Section
+-- ---------------------------------------------------------------------------------------------------------------------
+
+DROP FUNCTION IF EXISTS update_account_amount();
 DROP FUNCTION IF EXISTS update_timestamp_fields();
 
-DROP TABLE IF EXISTS "income";
-DROP TABLE IF EXISTS "expenditure";
-DROP TABLE IF EXISTS "income_category";
-DROP TABLE IF EXISTS "expenditure_category";
+-- ---------------------------------------------------------------------------------------------------------------------
+-- Tables Section
+-- ---------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE IF EXISTS "transaction";
+DROP TABLE IF EXISTS "transaction_category";
 DROP TABLE IF EXISTS "account";
 DROP TABLE IF EXISTS "currency";
 DROP TABLE IF EXISTS "user";
+
+-- ---------------------------------------------------------------------------------------------------------------------
+-- Data Types Section
+-- ---------------------------------------------------------------------------------------------------------------------
+
+DROP TYPE IF EXISTS "transaction_type";

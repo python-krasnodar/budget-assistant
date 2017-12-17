@@ -1,3 +1,13 @@
+-- ---------------------------------------------------------------------------------------------------------------------
+-- Data Types Section
+-- ---------------------------------------------------------------------------------------------------------------------
+
+CREATE TYPE "transaction_type" AS ENUM('I', 'E');
+
+-- ---------------------------------------------------------------------------------------------------------------------
+-- Tables Section
+-- ---------------------------------------------------------------------------------------------------------------------
+
 CREATE TABLE IF NOT EXISTS "user" (
   "id" SERIAL PRIMARY KEY,
   "username" VARCHAR(255) NOT NULL UNIQUE,
@@ -25,39 +35,29 @@ CREATE TABLE IF NOT EXISTS "account" (
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "expenditure_category" (
+CREATE TABLE IF NOT EXISTS "transaction_category" (
   "id" SERIAL PRIMARY KEY,
+  "type" transaction_type NOT NULL,
   "title" VARCHAR(255) NOT NULL,
   "description" TEXT DEFAULT NULL,
+  "user_id" INTEGER NOT NULL CONSTRAINT "fk_transaction_category_user_id" REFERENCES "user"("id"),
   "created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "income_category" (
+CREATE TABLE IF NOT EXISTS "transaction" (
   "id" SERIAL PRIMARY KEY,
-  "title" VARCHAR(255) NOT NULL,
-  "description" TEXT DEFAULT NULL,
+  "type" transaction_type NOT NULL,
+  "amount" DECIMAL(15, 2) NOT NULL,
+  "category_id" INTEGER NOT NULL CONSTRAINT "fk_transaction_category_id" REFERENCES "transaction_category"("id"),
+  "account_id" INTEGER NOT NULL CONSTRAINT "fk_transaction_account_id" REFERENCES "account"("id"),
   "created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "expenditure" (
-  "id" SERIAL PRIMARY KEY,
-  "amount" DECIMAL(15, 2) NOT NULL CHECK (amount > 0),
-  "category_id" INTEGER NOT NULL CONSTRAINT "fk_expenditure_category_id" REFERENCES "expenditure_category"("id"),
-  "account_id" INTEGER NOT NULL CONSTRAINT "fk_expenditure_account_id" REFERENCES "account"("id"),
-  "created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
-  "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NULL
-);
-
-CREATE TABLE IF NOT EXISTS "income" (
-  "id" SERIAL PRIMARY KEY,
-  "amount" DECIMAL(15, 2) NOT NULL CHECK (amount > 0),
-  "category_id" INTEGER NOT NULL CONSTRAINT "fk_income_category_id" REFERENCES "income_category"("id"),
-  "account_id" INTEGER NOT NULL CONSTRAINT "fk_income_account_id" REFERENCES "account"("id"),
-  "created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
-  "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NULL
-);
+-- ---------------------------------------------------------------------------------------------------------------------
+-- Functions Section
+-- ---------------------------------------------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION "update_timestamp_fields"() RETURNS trigger AS $update_timestamp_fields$
   BEGIN
@@ -72,95 +72,51 @@ CREATE OR REPLACE FUNCTION "update_timestamp_fields"() RETURNS trigger AS $updat
   END;
 $update_timestamp_fields$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION "expenditure_update_account_amount"() RETURNS trigger AS $expenditure_update_account_amount$
+CREATE OR REPLACE FUNCTION "update_account_amount"() RETURNS trigger AS $update_account_amount$
   BEGIN
     IF (TG_OP = 'DELETE') THEN
 
-      -- When expenditure delete row, we add old amount
-      UPDATE "account"
-        SET
-          "amount" = "amount" + OLD.amount
-        WHERE
-          "id" = OLD.account_id;
+      IF (OLD.type = 'E') THEN
+        UPDATE "account" SET "amount" = "amount" + OLD.amount WHERE "id" = OLD.account_id;
+      ELSIF (OLD.type = 'I') THEN
+        UPDATE "account" SET "amount" = "amount" - OLD.amount WHERE "id" = OLD.account_id;
+      END IF;
+
       RETURN OLD;
 
     ELSIF (TG_OP = 'INSERT') THEN
 
-      -- When expenditure insert row, we subtract new amount
-      UPDATE "account"
-        SET
-          "amount" = "amount" - NEW.amount
-        WHERE
-          "id" = NEW.account_id;
+      IF (NEW.type = 'E') THEN
+        UPDATE "account" SET "amount" = "amount" - NEW.amount WHERE "id" = NEW.account_id;
+      ELSEIF (NEW.type = 'I') THEN
+        UPDATE "account" SET "amount" = "amount" + NEW.amount WHERE "id" = NEW.account_id;
+      END IF;
+
       RETURN NEW;
 
     ELSIF (TG_OP = 'UPDATE') THEN
 
-      -- When expenditure update row, we:
-      --
-      -- 1. add old amount
-      -- 2. sub new amount
-      UPDATE "account"
-        SET
-          "amount" = "amount" + OLD.amount
-        WHERE
-          "id" = OLD.account_id;
+      IF (OLD.type = 'E') THEN
+        UPDATE "account" SET "amount" = "amount" + OLD.amount WHERE "id" = OLD.account_id;
+      ELSIF (OLD.type = 'I') THEN
+        UPDATE "account" SET "amount" = "amount" - OLD.amount WHERE "id" = OLD.account_id;
+      END IF;
 
-      UPDATE "account"
-        SET
-          "amount" = "amount" - NEW.amount
-        WHERE
-          "id" = NEW.account_id;
+      IF (NEW.type = 'E') THEN
+        UPDATE "account" SET "amount" = "amount" - NEW.amount WHERE "id" = NEW.account_id;
+      ELSIF (NEW.type = 'I') THEN
+        UPDATE "account" SET "amount" = "amount" + NEW.amount WHERE "id" = NEW.account_id;
+      END IF;
+
       RETURN NEW;
 
     END IF;
   END;
-$expenditure_update_account_amount$ LANGUAGE plpgsql;
+$update_account_amount$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION "income_update_account_amount"() RETURNS trigger AS $income_update_account_amount$
-  BEGIN
-    IF (TG_OP = 'DELETE') THEN
-
-      -- When income delete row, we sub old amount
-      UPDATE "account"
-        SET
-          "amount" = "amount" - OLD.amount
-        WHERE
-          "id" = OLD.account_id;
-      RETURN OLD;
-
-    ELSIF (TG_OP = 'INSERT') THEN
-
-      -- When income insert row, we add new amount
-      UPDATE "account"
-        SET
-          "amount" = "amount" + NEW.amount
-        WHERE
-          "id" = NEW.account_id;
-      RETURN NEW;
-
-    ELSIF (TG_OP = 'UPDATE') THEN
-
-      -- When expenditure update row, we:
-      --
-      -- 1. sub old amount
-      -- 2. add new amount
-      UPDATE "account"
-        SET
-          "amount" = "amount" - OLD.amount
-        WHERE
-          "id" = OLD.account_id;
-
-      UPDATE "account"
-        SET
-          "amount" = "amount" + NEW.amount
-        WHERE
-          "id" = NEW.account_id;
-      RETURN NEW;
-
-    END IF;
-  END;
-$income_update_account_amount$ LANGUAGE plpgsql;
+-- ---------------------------------------------------------------------------------------------------------------------
+-- Triggers Section
+-- ---------------------------------------------------------------------------------------------------------------------
 
 CREATE TRIGGER "currency_update_timestamp_fields"
   BEFORE INSERT OR UPDATE ON "currency"
@@ -170,30 +126,21 @@ CREATE TRIGGER "account_update_timestamp_fields"
   BEFORE INSERT OR UPDATE ON "account"
   FOR EACH ROW EXECUTE PROCEDURE update_timestamp_fields();
 
-CREATE TRIGGER "expenditure_category_update_timestamp_fields"
-  BEFORE INSERT OR UPDATE ON "expenditure_category"
+CREATE TRIGGER "transaction_category_update_timestamp_fields"
+  BEFORE INSERT OR UPDATE ON "transaction_category"
   FOR EACH ROW EXECUTE PROCEDURE update_timestamp_fields();
 
-CREATE TRIGGER "income_category_update_timestamp_fields"
-  BEFORE INSERT OR UPDATE ON "income_category"
+CREATE TRIGGER "transaction_update_timestamp_fields"
+  BEFORE INSERT OR UPDATE ON "transaction"
   FOR EACH ROW EXECUTE PROCEDURE update_timestamp_fields();
 
-CREATE TRIGGER "expenditure_update_timestamp_fields"
-  BEFORE INSERT OR UPDATE ON "expenditure"
-  FOR EACH ROW EXECUTE PROCEDURE update_timestamp_fields();
+CREATE TRIGGER "transaction_update_account_amount"
+  BEFORE INSERT OR UPDATE OR DELETE ON "transaction"
+  FOR EACH ROW EXECUTE PROCEDURE update_account_amount();
 
-CREATE TRIGGER "income_update_timestamp_fields"
-  BEFORE INSERT OR UPDATE ON "income"
-  FOR EACH ROW EXECUTE PROCEDURE update_timestamp_fields();
-
-CREATE TRIGGER "expenditure_amount_change"
-  BEFORE INSERT OR UPDATE OR DELETE ON "expenditure"
-  FOR EACH ROW EXECUTE PROCEDURE expenditure_update_account_amount();
-
-CREATE TRIGGER "income_amount_change"
-  BEFORE INSERT OR UPDATE OR DELETE ON "income"
-  FOR EACH ROW EXECUTE PROCEDURE income_update_account_amount();
-
+-- ---------------------------------------------------------------------------------------------------------------------
+-- Data Section
+-- ---------------------------------------------------------------------------------------------------------------------
 
 INSERT INTO "user"("username", "email") VALUES
   ('user0', 'user0@example.com'),
@@ -209,19 +156,65 @@ INSERT INTO "currency"("title", "iso4217") VALUES
   ('Bitcoin', 'BTC');
 
 INSERT INTO "account"("title", "user_id", "currency_id") VALUES
-  ('Wallet', (SELECT id FROM "user" WHERE "username" = 'user0' LIMIT 1), (SELECT id FROM "currency" WHERE "iso4217" = 'RUB' LIMIT 1)),
-  ('Crypto', (SELECT id FROM "user" WHERE "username" = 'user0' LIMIT 1), (SELECT id FROM "currency" WHERE "iso4217" = 'BTC' LIMIT 1)),
-  ('Wallet', (SELECT id FROM "user" WHERE "username" = 'user1' LIMIT 1), (SELECT id FROM "currency" WHERE "iso4217" = 'USD' LIMIT 1)),
-  ('Wallet', (SELECT id FROM "user" WHERE "username" = 'user3' LIMIT 1), (SELECT id FROM "currency" WHERE "iso4217" = 'EUR' LIMIT 1));
+  (
+    'Wallet',
+    (SELECT id FROM "user" WHERE "username" = 'user0' LIMIT 1),
+    (SELECT id FROM "currency" WHERE "iso4217" = 'RUB' LIMIT 1)
+  ),
+  (
+    'Crypto',
+    (SELECT id FROM "user" WHERE "username" = 'user0' LIMIT 1),
+    (SELECT id FROM "currency" WHERE "iso4217" = 'BTC' LIMIT 1)
+  ),
+  (
+    'Wallet',
+    (SELECT id FROM "user" WHERE "username" = 'user1' LIMIT 1),
+    (SELECT id FROM "currency" WHERE "iso4217" = 'USD' LIMIT 1)
+  ),
+  (
+    'Wallet',
+    (SELECT id FROM "user" WHERE "username" = 'user3' LIMIT 1),
+    (SELECT id FROM "currency" WHERE "iso4217" = 'EUR' LIMIT 1)
+  );
 
-INSERT INTO "income_category"("title") VALUES
-  ('Initial'),
-  ('Salary'),
-  ('Other');
-
-INSERT INTO "expenditure_category"("title") VALUES
-  ('Food'),
-  ('Communal'),
-  ('Education'),
-  ('Health'),
-  ('Entertainment');
+INSERT INTO "transaction_category"("type", "title", "user_id") VALUES
+  (
+    'I',
+    'Initial',
+    (SELECT "id" FROM "user" WHERE "username" = 'user0')
+  ),
+  (
+    'I',
+    'Salary',
+    (SELECT "id" FROM "user" WHERE "username" = 'user0')
+  ),
+  (
+    'I',
+    'Other',
+    (SELECT "id" FROM "user" WHERE "username" = 'user0')
+  ),
+  (
+    'E',
+    'Food',
+    (SELECT "id" FROM "user" WHERE "username" = 'user0')
+  ),
+  (
+    'E',
+    'Communal',
+    (SELECT "id" FROM "user" WHERE "username" = 'user0')
+  ),
+  (
+    'E',
+    'Education',
+    (SELECT "id" FROM "user" WHERE "username" = 'user0')
+  ),
+  (
+    'E',
+    'Health',
+    (SELECT "id" FROM "user" WHERE "username" = 'user0')
+  ),
+  (
+    'E',
+    'Entertainment',
+    (SELECT "id" FROM "user" WHERE "username" = 'user0')
+  );
