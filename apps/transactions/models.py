@@ -13,9 +13,6 @@ class Category(models.Model):
     created_at = models.DateTimeField(null=False, blank=True, editable=False)
     updated_at = models.DateTimeField(default=None, null=True, blank=True, editable=False)
 
-    class ReadonlyMeta:
-        readonly = ('created_at', 'updated_at')
-
     def __str__(self):
         return self.title
 
@@ -27,9 +24,6 @@ class Transaction(models.Model):
     account = models.ForeignKey(Account, null=False, blank=False, db_column='account_id', on_delete=models.CASCADE)
     created_at = models.DateTimeField(null=False, blank=True, editable=False)
     updated_at = models.DateTimeField(default=None, null=True, blank=True, editable=False)
-
-    class ReadonlyMeta:
-        readonly = ('created_at', 'updated_at')
 
     def __str__(self):
         return '%s (%f)' % (self.category.title, self.amount)

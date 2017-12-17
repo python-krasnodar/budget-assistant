@@ -38,8 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'django_readonly_field',
-
     'apps.db',
     'apps.accounts',
     'apps.transactions',
