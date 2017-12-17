@@ -73,7 +73,23 @@ CREATE OR REPLACE FUNCTION "update_timestamp_fields"() RETURNS trigger AS $updat
 $update_timestamp_fields$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION "update_account_amount"() RETURNS trigger AS $update_account_amount$
+  DECLARE
+    account_user_id INTEGER;
+    category_user_id INTEGER;
   BEGIN
+
+    -- Check transaction category id
+    IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
+
+      SELECT "user_id" INTO account_user_id FROM "account" WHERE "id" = NEW.account_id;
+      SELECT "user_id" INTO category_user_id FROM "transaction_category" WHERE "id" = NEW.category_id;
+
+      IF (account_user_id != category_user_id) THEN
+        RAISE EXCEPTION 'Invalid transaction category id';
+      END IF;
+
+    END IF;
+
     IF (TG_OP = 'DELETE') THEN
 
       IF (OLD.type = 'E') THEN
