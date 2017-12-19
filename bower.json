@@ -1,0 +1,20 @@
+{
+  "name": "budget-assistant",
+  "homepage": "https://github.com/python-krasnodar/budget-assistant",
+  "authors": [
+    "Memory Clutter <memclutter@gmail.com>"
+  ],
+  "description": "Budget assistant, which works in the web.",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "gentelella": "^1.4.0"
+  }
+}
