@@ -2,7 +2,7 @@ import json
 
 from django.http import HttpResponse
 from django.views import View
-from django.views.generic import ListView, CreateView, DeleteView
+from django.views.generic import ListView, CreateView, DeleteView, DetailView
 
 from apps.accounts.models import Account, Currency
 
@@ -13,7 +13,18 @@ class AccountListView(ListView):
 
     def get_queryset(self):
         queryset = super(AccountListView, self).get_queryset()
-        queryset.filter(user__exact=self.request.user)
+        queryset = queryset.filter(user__exact=self.request.user)
+
+        return queryset.all()
+
+
+class AccountDetailView(DetailView):
+    template_name = 'accounts/view.html'
+    queryset = Account.objects
+
+    def get_queryset(self):
+        queryset = super(AccountDetailView, self).get_queryset()
+        queryset = queryset.filter(user__exact=self.request.user)
 
         return queryset.all()
 
@@ -33,7 +44,7 @@ class AccountDeleteView(DeleteView):
 
     def get_queryset(self):
         queryset = super(AccountDeleteView, self).get_queryset()
-        queryset.filter(user__exact=self.request.user)
+        queryset = queryset.filter(user__exact=self.request.user)
 
         return queryset.all()
 

@@ -34,12 +34,13 @@
                 {% for account in account_list %}
                     <tr class="text-{% if account.amount >= 0 %}success{% else %}danger{% endif %}">
                         <td>{{ account.id }}</td>
-                        <td>
-                            <a href="">{{ account.title }}</a>
-                        </td>
+                        <td>{{ account.title }}</td>
                         <td>{{ account.amount }}</td>
                         <td>{{ account.currency.iso4217 }}</td>
                         <td>
+                            <a href="{% url 'accounts:view' account.id %}" class="btn btn-primary">
+                                <i class="fa fa-eye"></i>
+                            </a>
                             <a href="{% url 'accounts:delete' account.id %}" class="btn btn-danger">
                                 <i class="fa fa-trash"></i>
                             </a>
