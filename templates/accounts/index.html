@@ -32,7 +32,7 @@
                 <tbody>
 
                 {% for account in account_list %}
-                    <tr>
+                    <tr class="text-{% if account.amount >= 0 %}success{% else %}danger{% endif %}">
                         <td>{{ account.id }}</td>
                         <td>
                             <a href="">{{ account.title }}</a>
