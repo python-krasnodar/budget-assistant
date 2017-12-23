@@ -2,7 +2,7 @@ import json
 
 from django.http import HttpResponse
 from django.views import View
-from django.views.generic import ListView, CreateView
+from django.views.generic import ListView, CreateView, DeleteView
 
 from apps.accounts.models import Account, Currency
 
@@ -26,6 +26,19 @@ class AccountCreateView(CreateView):
     def form_valid(self, form):
         form.instance.user = self.request.user
         return super(AccountCreateView, self).form_valid(form)
+
+
+class AccountDeleteView(DeleteView):
+    queryset = Account.objects
+
+    def get_queryset(self):
+        queryset = super(AccountDeleteView, self).get_queryset()
+        queryset.filter(user__exact=self.request.user)
+
+        return queryset.all()
+
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
 
 
 class CurrencyAjaxListView(View):

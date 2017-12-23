@@ -26,6 +26,7 @@
                     <th>Title</th>
                     <th>Amount</th>
                     <th>Currency</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -38,6 +39,11 @@
                         </td>
                         <td>{{ account.amount }}</td>
                         <td>{{ account.currency.iso4217 }}</td>
+                        <td>
+                            <a href="{% url 'accounts:delete' account.id %}" class="btn btn-danger">
+                                <i class="fa fa-trash"></i>
+                            </a>
+                        </td>
                     </tr>
                 {% endfor %}
                 </tbody>
