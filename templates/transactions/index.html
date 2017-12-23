@@ -1,0 +1,53 @@
+{% extends 'layouts/gentelella/layout.html' %}
+
+{% block content_header %}
+
+    <div class="page-title">
+        <div class="title_left">
+            <h3>Transactions</h3>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="x_panel">
+        <div class="x_content">
+
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Account</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Currency</th>
+                    <th>Category</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                {% for transaction in transaction_list %}
+                    <tr>
+                        <td>{{ transaction.id }}</td>
+                        <td>{{ transaction.account.title }}</td>
+                        <td>
+                            {% if transaction.type == 'I' %}
+                                <i class="fa fa-arrow-up text-success"></i>
+                            {% else %}
+                                <i class="fa fa-arrow-down text-danger"></i>
+                            {% endif %}
+                        </td>
+                        <td class="text-{% if transaction.type == 'I' %}success{% else %}danger{% endif %}">{{ transaction.amount }}</td>
+                        <td>{{ transaction.account.currency.iso4217 }}</td>
+                        <td>{{ transaction.category.title }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+{% endblock %}
