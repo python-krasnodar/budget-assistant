@@ -1,8 +1,10 @@
-from django.urls.conf import path
+from django.urls import reverse
+from django.urls.conf import path, include
 
-from apps.accounts.views import ListView, CreateView
+from apps.accounts.views import AccountListView, AccountCreateView
 
 urlpatterns = [
-    path('', ListView.as_view(), name='index'),
-    path('create/', CreateView.as_view(), name='create'),
+    path('', AccountListView.as_view(), name='index'),
+    path('create/', AccountCreateView.as_view(success_url='/accounts/'), name='create'),
+    path('ajax/', include(('apps.accounts.ajax_urls', 'ajax'))),
 ]

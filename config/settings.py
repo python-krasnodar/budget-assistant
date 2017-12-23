@@ -143,6 +143,8 @@ STATICFILES_FINDERS = (
 BOWER_COMPONENTS_ROOT = BASE_DIR
 BOWER_INSTALLED_APPS = (
     'gentelella',
+    'select2',
+    'select2-bootstrap-theme',
 )
 
 LOGIN_URL = '/login/'

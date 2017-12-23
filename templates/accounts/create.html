@@ -1,4 +1,14 @@
 {% extends 'layouts/gentelella/layout.html' %}
+{% load staticfiles %}
+
+{% block head %}
+
+    {{ block.super }}
+
+    <link rel="stylesheet" type="text/css" href="{% static 'select2/dist/css/select2.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'select2-bootstrap-theme/dist/select2-bootstrap.min.css' %}">
+
+{% endblock %}
 
 {% block content_header %}
 
@@ -15,27 +25,36 @@
     <div class="x_panel">
         <div class="x_content">
 
-            <form id="demo-form2" data-parsley-validate class="form-horizontal form-label-left">
+            <form id="demo-form2" data-parsley-validate class="form-horizontal form-label-left" method="post">
+
+                {% csrf_token %}
 
                 <div class="form-group">
-                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="{{ form.title.id_for_label }}">{{ form.title.label }} <span
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12"
+                           for="{{ form.title.id_for_label }}">{{ form.title.label }} <span
                             class="required">*</span>
                     </label>
                     <div class="col-md-6 col-sm-6 col-xs-12">
-                        <input type="text" id="{{ form.title.id_for_label }}" required="required" class="form-control col-md-7 col-xs-12" name="{{ form.title.name }}" value="{{ form.title.value | default_if_none:'' }}">
+                        <input type="text" id="{{ form.title.id_for_label }}" required="required"
+                               class="form-control col-md-7 col-xs-12" name="{{ form.title.name }}"
+                               value="{{ form.title.value | default_if_none:'' }}">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="{{ form.description.id_for_label }}">{{ form.description.label }}
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12"
+                           for="{{ form.description.id_for_label }}">{{ form.description.label }}
                     </label>
                     <div class="col-md-6 col-sm-6 col-xs-12">
-                        <textarea class="form-control col-md-7 col-xs-12" name="{{ form.description.value }}" id="{{ form.description.id_for_label }}">{{ form.description.value|default_if_none:'' }}</textarea>
+                        <textarea class="form-control col-md-7 col-xs-12" name="{{ form.description.name }}"
+                                  id="{{ form.description.id_for_label }}">{{ form.description.value|default_if_none:'' }}</textarea>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="{{ form.currency.id_for_label }}" class="control-label col-md-3 col-sm-3 col-xs-12">{{ form.currency.label }}</label>
+                    <label for="{{ form.currency.id_for_label }}"
+                           class="control-label col-md-3 col-sm-3 col-xs-12">{{ form.currency.label }}</label>
                     <div class="col-md-6 col-sm-6 col-xs-12">
-                        <select name="{{ form.currency.name }}" class="form-control col-md-7 col-xs-12" id="{{ form.currency.id_for_label }}">
+                        <select name="{{ form.currency.name }}" class="form-control col-md-7 col-xs-12"
+                                id="{{ form.currency.id_for_label }}">
                             <option value="">Select currency ...</option>
                         </select>
                     </div>
@@ -50,5 +69,27 @@
             </form>
         </div>
     </div>
+
+{% endblock %}
+
+{% block body_end %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" src="{% static 'select2/dist/js/select2.js' %}"></script>
+    <script type="text/javascript">
+
+        $(function () {
+            $('#{{ form.currency.id_for_label }}').select2({
+                theme: 'bootstrap',
+                ajax: {
+                    url: '{% url 'accounts:ajax:currency' %}',
+                    dataType: 'json'
+                }
+            });
+
+        });
+
+    </script>
 
 {% endblock %}
