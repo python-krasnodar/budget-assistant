@@ -1,0 +1,49 @@
+{% extends 'layouts/gentelella/layout.html' %}
+
+{% block content_header %}
+
+    <div class="page-title">
+        <div class="title_left">
+            <h3>Accounts</h3>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="x_panel">
+        <div class="x_content">
+
+            <a href="{% url 'accounts:create' %}" class="btn btn-success">Create</a>
+
+            <div class="clearfix"></div>
+
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Amount</th>
+                    <th>Currency</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                {% for account in account_list %}
+                    <tr>
+                        <td>{{ account.id }}</td>
+                        <td>
+                            <a href="">{{ account.title }}</a>
+                        </td>
+                        <td>{{ account.amount }}</td>
+                        <td>{{ account.currency.iso4217 }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+{% endblock %}

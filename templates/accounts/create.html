@@ -1,0 +1,54 @@
+{% extends 'layouts/gentelella/layout.html' %}
+
+{% block content_header %}
+
+    <div class="page-title">
+        <div class="title_left">
+            <h3>Accounts</h3>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="x_panel">
+        <div class="x_content">
+
+            <form id="demo-form2" data-parsley-validate class="form-horizontal form-label-left">
+
+                <div class="form-group">
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="{{ form.title.id_for_label }}">{{ form.title.label }} <span
+                            class="required">*</span>
+                    </label>
+                    <div class="col-md-6 col-sm-6 col-xs-12">
+                        <input type="text" id="{{ form.title.id_for_label }}" required="required" class="form-control col-md-7 col-xs-12" name="{{ form.title.name }}" value="{{ form.title.value | default_if_none:'' }}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="{{ form.description.id_for_label }}">{{ form.description.label }}
+                    </label>
+                    <div class="col-md-6 col-sm-6 col-xs-12">
+                        <textarea class="form-control col-md-7 col-xs-12" name="{{ form.description.value }}" id="{{ form.description.id_for_label }}">{{ form.description.value|default_if_none:'' }}</textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.currency.id_for_label }}" class="control-label col-md-3 col-sm-3 col-xs-12">{{ form.currency.label }}</label>
+                    <div class="col-md-6 col-sm-6 col-xs-12">
+                        <select name="{{ form.currency.name }}" class="form-control col-md-7 col-xs-12" id="{{ form.currency.id_for_label }}">
+                            <option value="">Select currency ...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ln_solid"></div>
+                <div class="form-group">
+                    <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+                        <button type="submit" class="btn btn-success">Submit</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+{% endblock %}
