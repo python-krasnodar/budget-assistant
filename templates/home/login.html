@@ -1,0 +1,51 @@
+{% extends 'layouts/gentelella/layout.html' %}
+
+{% block body_attrs %} class="login"{% endblock %}
+
+{% block body %}
+
+    <div>
+        <div class="login_wrapper">
+            <div class="animate form login_form">
+                <section class="login_content">
+                    <form method="post">
+                        <h1>Login Form</h1>
+
+                        {% csrf_token %}
+
+                        {{ form.non_field_errors }}
+
+                        <div>
+                            {{ form.username.errors }}
+                            <input
+                                type="text"
+                                class="form-control"
+                                placeholder="{{ form.username.label }}"
+                                name="{{ form.username.name }}"
+                                value="{{ form.username.value | default_if_none:'' }}"
+                                required
+                            />
+                        </div>
+                        <div>
+                            {{ form.password.errors }}
+                            <input
+                                type="password"
+                                class="form-control"
+                                placeholder="Password"
+                                name="{{ form.password.name }}"
+                                value="{{ form.password.value | default_if_none:'' }}"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <button class="btn btn-default submit" type="submit">Log in</button>
+                        </div>
+
+                        <div class="clearfix"></div>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
