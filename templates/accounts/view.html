@@ -4,7 +4,9 @@
 
     <div class="page-title">
         <div class="title_left">
-            <h3>Accounts <small>{{ account.title }} detail</small></h3>
+            <h3>Accounts
+                <small>{{ account.title }} detail</small>
+            </h3>
         </div>
     </div>
 
@@ -12,16 +14,84 @@
 
 {% block content %}
 
-    <div class="x_panel">
-        <div class="x_content">
-            <!-- TODO account info -->
-        </div>
-    </div>
+    <div class="row">
 
-    <div class="x_panel">
-        <div class="x_content">
-            <!-- TODO list of account transactions -->
+        <div class="col-sm-4 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Account Info</h2>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>ID</th>
+                            <td>{{ account.id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Title</th>
+                            <td>{{ account.title }}</td>
+                        </tr>
+                        <tr>
+                            <th>Description</th>
+                            <td>{{ account.description }}</td>
+                        </tr>
+                        <tr>
+                            <th>Currency</th>
+                            <td>{{ account.currency.title }}</td>
+                        </tr>
+                        <tr>
+                            <th>Amount</th>
+                            <td class="text-{% if account.amount >= 0 %}success{% else %}danger{% endif %}">
+                                {{ account.amount }}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
         </div>
+
+        <div class="col-sm-8 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Transactions</h2>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Created At</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Currency</th>
+                            <th>Category</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        {% for transaction in account.transaction_set.all %}
+                            <tr>
+                                <td>{{ transaction.created_at|date }} {{ transaction.created_at|time }}</td>
+                                <td>
+                                    {% if transaction.type == 'I' %}
+                                        <i class="fa fa-arrow-up text-success"></i>
+                                    {% else %}
+                                        <i class="fa fa-arrow-down text-danger"></i>
+                                    {% endif %}
+                                </td>
+                                <td class="text-{% if transaction.type == 'I' %}success{% else %}danger{% endif %}">{{ transaction.amount }}</td>
+                                <td>{{ transaction.account.currency.iso4217 }}</td>
+                                <td>{{ transaction.category.title }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 {% endblock %}
